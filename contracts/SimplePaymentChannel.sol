@@ -4,8 +4,8 @@ pragma solidity 0.8.20;
 contract SimplePaymentChannel {
     address owner;
     address recipient;
-    mapping(address => uint)deposits;
-    mapping(address => uint[])payments;
+    mapping(address => uint) deposits;
+    mapping(address => uint[]) payments;
 
     // @dev The constructor function should initialize the contract
     // by setting the wholesale seller’s address as the owner and the
@@ -45,25 +45,24 @@ contract SimplePaymentChannel {
     function closeChannel() public {
         require(msg.sender == owner || msg.sender == recipient, "Only owner or recipient can close the channel");
 
-        uint remainingBalance = address(this).balance;
-        if (remainingBalance > 0) {
-            if (msg.sender == owner) {
-                payable(owner).transfer(remainingBalance);
-            } else {
-                payable(recipient).transfer(remainingBalance);
-            }
+        if (deposits[owner] > 0) {
+            payable(owner).transfer(deposits[owner]);
+        }
+
+        if (address(this).balance > 0) {
+            payable(recipient).transfer(address(this).balance);
         }
     }
 
     // @dev This function should return the current balance in the Simple Payment Channel.
     function checkBalance() public view returns (uint256) {
-         return deposits[msg.sender];
+        return deposits[msg.sender];
     }
 
     // @dev This function should return an array of all the payments
     // listed in the Simple Payment Channel. Each element in the array
     // represents the amount of a listed payment.
     function getAllPayments() public view returns (uint256[] memory) {
-         return payments[msg.sender];
+        return payments[msg.sender];
     }
 }
